@@ -1,0 +1,152 @@
+---
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task: update
+      - task: git
+      - task: IDEs
+      - task: Obsidian
+      - task: docker
+      - task: minikube
+      - task: starship
+      - task: communication
+      - task: chrome
+      - task: onepassword
+      - task: warp
+      - task: nerdfonts
+      - task: mkchromecast
+      - task: pyenv
+      - task: poetry
+      - task: gnome-extensions
+      - echo "installed all"
+  update:
+    run: once
+    cmds:
+      - sudo apt update
+      - sudo apt upgrade
+      - sudo apt install ssh curl wget git zip net-tools
+  git:
+    deps:
+      - update
+    cmds:
+      - git config --global user.name "Pieter Geelen"
+      - git config --global user.email pieter@geelen.io
+  IDEs:
+    deps:
+      - update
+    cmds:
+      - sudo snap install pycharm-professional --classic
+      - sudo snap install datagrip --classic
+      - sudo snap install intellij-idea-ultimate --classic
+      - sudo snap install rustrover --edge --classic
+      - sudo snap install code --classic
+      - sudo snap install kontena-lens --classic
+  Obsidian:
+    deps:
+      - update
+    cmds:
+      - sudo snap install obsidian
+  docker:
+    deps:
+      - update
+    cmds:
+      - sudo apt install docker.io docker-compose-v2
+      - sudo groupadd docker || echo "group already exists"
+      - sudo usermod -aG docker $USER || echo "User already added to group"
+  minikube:
+    deps:
+      - update
+    cmds:
+      - curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube_latest_amd64.deb
+      - sudo dpkg -i minikube_latest_amd64.deb
+      - rm minikube_latest_amd64.deb
+  communication:
+    deps:
+      - update
+    cmds:
+      - sudo snap install skype
+      - sudo snap install discord
+      - sudo snap install slack
+  starship:
+    deps:
+      - update
+    cmds:
+      - curl -sS https://starship.rs/install.sh | sh
+      - curl https://gist.githubusercontent.com/psmgeelen/0024300c469e4f4087fef069b01b2689/raw/8d3f92b2b1f8e7337511bed08b6c5ef3832e9d3a/starship.toml > ~/.config/starship.toml
+  chrome:
+    deps:
+      - update
+    cmds:
+      - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+      - sudo dpkg -i google-chrome-stable_current_amd64.deb
+      - rm google-chrome-stable_current_amd64.deb
+  onepassword:
+    deps:
+      - update
+    cmds:
+      - wget https://downloads.1password.com/linux/debian/amd64/stable/1password-latest.deb
+      - sudo dpkg -i 1password-latest.deb
+      - rm 1password-latest.deb
+  warp:
+    deps:
+      - update
+    cmds:
+      - wget https://releases.warp.dev/stable/v0.2024.05.07.08.02.stable_02/warp-terminal_0.2024.05.07.08.02.stable.02_amd64.deb
+      - sudo dpkg -i warp-terminal_0.2024.05.07.08.02.stable.02_amd64.deb
+      - rm warp-terminal_0.2024.05.07.08.02.stable.02_amd64.deb
+      - sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/warp-terminal 100
+      - sudo update-alternatives --config x-terminal-emulator
+  nerdfonts:
+    deps:
+      - update
+    dir: ~/.local/share/fonts
+    cmds:
+      - wget  https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/FiraMono.zip
+      - wget  https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/FiraCode.zip
+      - unzip FiraMono.zip
+      - unzip FiraCode.zip
+      - rm FiraMono.zip
+      - rm FiraCode.zip
+      - sleep 5
+      - fc-cache -fv
+  mkchromecast:
+    deps:
+      - update
+    cmds:
+      - sudo apt install mkchromecast
+  twingate:
+    deps:
+      - update
+    cmds:
+      - curl -s https://binaries.twingate.com/client/linux/install.sh | sudo bash
+  pyenv:
+    deps:
+      - update
+    cmds:
+      - sudo apt install make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+      - curl https://pyenv.run | bash || echo "PyEnv already installed"
+      - echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+      - echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+      - echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+  poetry:
+    deps:
+      - update
+    cmds:
+      - curl -sSL https://install.python-poetry.org | python3 -
+      - echo 'export PATH="$HOME/.poetry/bin:$PATH"' >> ~/.bashrc
+      - export PATH="$HOME/.poetry/bin:$PATH"
+      - poetry completions bash >> ~/.bash_completion
+  gnome-extensions:
+    deps:
+      - update
+    cmds:
+      - sudo apt install gnome-tweaks
+      - sudo apt install gnome-shell-extensions
+      - sudo apt install gnome-shell-extension-manager
+      - sudo apt install bash perl curl dbus git less
+      - wget -O gnome-shell-extension-installer "https://github.com/brunelli/gnome-shell-extension-installer/raw/master/gnome-shell-extension-installer"
+      - sudo chmod +x gnome-shell-extension-installer
+      - sudo mv gnome-shell-extension-installer /usr/bin/
+      - gnome-shell-extension-installer 4548 --yes

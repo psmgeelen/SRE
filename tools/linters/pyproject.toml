@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "linters"
+version = "0.1.0"
+description = "Python environment to run all linters from."
+authors = ["Pieter Geelen <pieter@geelen.io>"]
+license = "UNLICENSE"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+yamllint = "^1.35.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
