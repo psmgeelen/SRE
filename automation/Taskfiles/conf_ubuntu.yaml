@@ -20,6 +20,8 @@ tasks:
       - task: pyenv
       - task: poetry
       - task: gnome-extensions
+      - task: kubectl
+      - task: kubectx
       - echo "installed all"
   update:
     run: once
@@ -30,6 +32,7 @@ tasks:
   git:
     deps:
       - update
+    run: once
     cmds:
       - git config --global user.name "Pieter Geelen"
       - git config --global user.email pieter@geelen.io
@@ -125,7 +128,10 @@ tasks:
     deps:
       - update
     cmds:
-      - sudo apt install make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+      - >
+        sudo apt install make build-essential libssl-dev zlib1g-dev libbz2-dev
+        libreadline-dev libsqlite3-dev wget curl llvm libncursesw5-dev xz-utils
+        tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
       - curl https://pyenv.run | bash || echo "PyEnv already installed"
       - echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
       - echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
@@ -142,11 +148,44 @@ tasks:
     deps:
       - update
     cmds:
-      - sudo apt install gnome-tweaks
-      - sudo apt install gnome-shell-extensions
-      - sudo apt install gnome-shell-extension-manager
-      - sudo apt install bash perl curl dbus git less
+      - sudo apt install gnome-tweaks gnome-shell-extensions
+        gnome-shell-extension-manager bash perl curl dbus git less
       - wget -O gnome-shell-extension-installer "https://github.com/brunelli/gnome-shell-extension-installer/raw/master/gnome-shell-extension-installer"
       - sudo chmod +x gnome-shell-extension-installer
       - sudo mv gnome-shell-extension-installer /usr/bin/
       - gnome-shell-extension-installer 4548 --yes
+  kubectl:
+    deps:
+      - update
+    run: once
+    cmds:
+      - curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+      - echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+      - sudo apt update
+      - sudo apt install kubectl
+  krew:
+    deps:
+      - update
+      - kubectl
+    cmds:
+      - >
+        (
+          set -x; cd "$(mktemp -d)" &&
+          OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+          ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+          KREW="krew-${OS}_${ARCH}" &&
+          curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+          tar zxvf "${KREW}.tar.gz" &&
+          ./"${KREW}" install krew
+        )
+      - echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/.bashrc
+  kubectx:
+    deps:
+      - update
+    cmds:
+      - sudo snap install kubectx
+  nfs-common:
+    deps:
+      - update
+    cmds:
+      - sudo apt install nfs-common
